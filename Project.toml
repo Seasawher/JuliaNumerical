@@ -1,0 +1,4 @@
+name = "JuliaNumerical"
+uuid = "e87ad218-e2a0-4367-bcd9-5b669cb95841"
+authors = ["Seasawher <tellagoodstory@icloud.com>"]
+version = "0.1.0"
