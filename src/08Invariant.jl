@@ -49,18 +49,84 @@ begin
 	uv_sq
 end
 
-# ╔═╡ c236b3ed-d6a4-4f92-98a2-4231aaf1b825
-plotly()
-
 # ╔═╡ ed647487-9d20-41f9-83d6-4a55ed0ab02e
-begin
+let
 	default( legend = :outertopright, xlabel = "time t", ylabel = "number" )
 	
 	t_sq = Δt * [0:500]
+	plot(t_sq, uv_sq, label = ["魚 🐟" "鮫 🦈"], fontfamily="Meiryo" )
 end
 
-# ╔═╡ 4abd2f93-6e72-4565-b6aa-7c92bfab0321
-plot(sin)
+# ╔═╡ ec86b3f0-7385-41b5-a2b8-77b7fd57cd9a
+let
+	t_sq = Δt * [0:500]
+	plot(t_sq, G_sq, yaxis = "G", leg = false)
+end
+
+# ╔═╡ 2160f74f-f835-4c2e-a9bf-a0f8a17589ff
+begin
+u_sq = uv_sq[:,1] # データの 1行目 = u の近似値列
+v_sq = uv_sq[:,2] # データの 2行目 = v の近似値列
+
+plot(u_sq, v_sq)
+plot!((u0,v0), marker = :circle, fontfamily="Meiryo",
+  aspect_ratio = 1, legend = false,
+  xaxis = "魚 🐟", yaxis = "鮫 🦈" )
+# aspect_ratio は縦横の軸の比率．
+
+annotate!(u0,v0, ("初期値", :bottom, :left))
+end
+
+# ╔═╡ 2ffb2daf-48e1-4421-a3b5-2c8675a3c085
+# 一定であるべき保存量の初期値
+iniG = G(u0, v0, E)
+
+# ╔═╡ e82a4ab4-6f40-4946-83fe-be19fc727fc6
+begin
+U = 0.5:0.01:3.0   # 解の値をみて適当に
+V = 0.01:0.01:1.5
+
+Z = [ G(u,v,E) for u in U, v in V ]
+# U, V の範囲全部の G を計算した結果を行列に！ 強引だなあ．
+
+Plots.contour(U, V, Z', aspect_ratio = 1, legend = false,
+        xaxis = "魚 🐟", yaxis = "鮫 🦈", 
+        clims = (iniG-0.001, iniG+0.001)) 
+# そして，G が iniG に近い値の場合だけグラフ出力する．
+# clims で、出力値の描画を制限できるのだ．
+
+plot!((u0,v0), marker = :circle, fontfamily = "Meiryo")
+annotate!(u0,v0, ("初期値", :bottom, :left) )
+end
+
+# ╔═╡ bcaef8f0-46a9-40c0-ba0c-777d1a64eacb
+begin
+
+plot!((u0,v0), marker = :circle, fontfamily = "Meiryo")
+annotate!(u0,v0, ("初期値", :bottom, :left) )
+
+plot!(u_sq, v_sq) # Euler法による近似解
+end
+
+# ╔═╡ 6548d30f-5f77-4ed9-b0c4-7b96f338956e
+@time 3 + 2
+
+# ╔═╡ 281f7014-cadc-44a8-a241-d325f4d8cc97
+let
+	# オイラー法の実行時間計測
+	u,v = u0,v0
+	uv_sq = [u0 v0]
+	G_sq = [ G(u,v,E) ]
+	
+	@time for i in 1:500
+	    u, v = volterra_euler(u,v,E)
+	    uv_sq = vcat(uv_sq, [ u v ])
+	    push!( G_sq, G(u,v,E) )
+	end
+end
+
+# ╔═╡ c2401242-eb8d-4aa2-9d96-bfe215b60f8a
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -77,7 +143,7 @@ Plots = "~1.40.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "81f99289d11d82f592f8e8906b6f9813d4e56323"
 
@@ -1151,8 +1217,14 @@ version = "1.4.1+1"
 # ╠═155d3699-1bc6-4fd3-beca-5115a1ddb4ac
 # ╠═d72124f8-0a52-4f93-8fc0-33da9b7ddc14
 # ╠═95f36fe6-dfd7-4827-8682-aa128a7b6e2f
-# ╠═c236b3ed-d6a4-4f92-98a2-4231aaf1b825
 # ╠═ed647487-9d20-41f9-83d6-4a55ed0ab02e
-# ╠═4abd2f93-6e72-4565-b6aa-7c92bfab0321
+# ╠═ec86b3f0-7385-41b5-a2b8-77b7fd57cd9a
+# ╠═2160f74f-f835-4c2e-a9bf-a0f8a17589ff
+# ╠═2ffb2daf-48e1-4421-a3b5-2c8675a3c085
+# ╠═e82a4ab4-6f40-4946-83fe-be19fc727fc6
+# ╠═bcaef8f0-46a9-40c0-ba0c-777d1a64eacb
+# ╠═6548d30f-5f77-4ed9-b0c4-7b96f338956e
+# ╠═281f7014-cadc-44a8-a241-d325f4d8cc97
+# ╠═c2401242-eb8d-4aa2-9d96-bfe215b60f8a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
